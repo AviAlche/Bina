@@ -16,6 +16,9 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+from difflib import _format_range_context
+from macpath import curdir
+from time import clock
 
 import util
 
@@ -72,6 +75,8 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,8 +92,34 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    #first check
-    util.raiseNotDefined()
+    returnList = list()
+    closedList = list()
+    openStack = util.Stack()
+    cordinateList = list()
+    for node in problem.getSuccessors(problem.getStartState()):
+        openStack.push(bigNode(problem.getStartState(),node))
+        cordinateList.append(node[0])
+        start = True
+    while(not openStack.isEmpty()):
+        current = openStack.pop()
+        if(start == False):
+             cordinateList.remove(current.node[0])
+        else:
+            start = False
+        if(problem.isGoalState(current.node[0])):
+            pathNode=None
+            while (not current==problem.getStartState()):
+                pathNode=current.node
+                returnList.insert(0,pathNode[1])
+                current=current.prev
+            return returnList
+        else:
+            for n in problem.getSuccessors(current.node[0]):
+                node=bigNode(current,n)
+                if(n[0] not in closedList and n[0] not in cordinateList):
+                    openStack.push(node)
+                    cordinateList.append(n[0])
+        closedList.append(current.node[0])
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -118,3 +149,9 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+class bigNode:
+    def __init__(self,prevNode,currNode):
+        self.node=currNode
+        self.prev=prevNode
