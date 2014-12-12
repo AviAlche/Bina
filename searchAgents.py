@@ -288,13 +288,13 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
+        return (self.startingPosition,[0,0,0,0])
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -302,6 +302,10 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        for corner in state[1]:
+            if(corner == 0):
+                return False
+        return True
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -323,7 +327,23 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            top, right = self.walls.height-2, self.walls.width-2
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 1
+                newArr = state[1]
+                if((nextx,nexty) == (1,1)):
+                   newArr[0] = 1
+                if((nextx,nexty) == (1,top)):
+                   newArr[1] = 1
+                if((nextx,nexty) == (right,1)):
+                   newArr[2] = 1
+                if((nextx,nexty) == (right,top)):
+                   newArr[3] = 1
+                successors.append( ( (nextState,newArr), action, cost) )
             "*** YOUR CODE HERE ***"
 
         self._expanded += 1 # DO NOT CHANGE
@@ -540,3 +560,12 @@ def mazeDistance(point1, point2, gameState):
     assert not walls[x2][y2], 'point2 is a wall: ' + str(point2)
     prob = PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)
     return len(search.bfs(prob))
+
+
+class cornerState():
+    def __init__(self,startPoint,upleft,upright,downright,downleft):
+        self.startPoint=startPoint
+        self.upLeft=upleft
+        self.upRight=upright
+        self.downRight=downright
+        self.downLeft=downleft
