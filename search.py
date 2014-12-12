@@ -92,44 +92,62 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    returnList = list()
-    closedList = list()
-    openStack = util.Stack()
-    cordinateList = list()
-    for node in problem.getSuccessors(problem.getStartState()):
-        openStack.push(bigNode(problem.getStartState(),node))
-        cordinateList.append(node[0])
-        start = True
-    while(not openStack.isEmpty()):
-        current = openStack.pop()
-        if(start == False):
-             cordinateList.remove(current.node[0])
+    openList = util.Stack()
+    closeList = []
+    openListTrace = []
+    moves = []
+    startPoint = problem.getStartState()
+    openList.push((startPoint,moves))
+    while not openList.isEmpty():
+        current,moves =  openList.pop()
+        if(problem.isGoalState(current)):
+            return moves
         else:
-            start = False
-        if(problem.isGoalState(current.node[0])):
-            pathNode=None
-            while (not current==problem.getStartState()):
-                pathNode=current.node
-                returnList.insert(0,pathNode[1])
-                current=current.prev
-            return returnList
-        else:
-            for n in problem.getSuccessors(current.node[0]):
-                node=bigNode(current,n)
-                if(n[0] not in closedList and n[0] not in cordinateList):
-                    openStack.push(node)
-                    cordinateList.append(n[0])
-        closedList.append(current.node[0])
+            for point,action,cost in problem.getSuccessors(current):
+                if(point not in closeList and point not in openListTrace):
+                    openList.push((point,moves+[action]))
+                    openListTrace.append(point)
+            closeList.append(current)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    openList = util.Queue()
+    closeList = []
+    openListTrace = []
+    moves = []
+    startPoint = problem.getStartState()
+    openList.push((startPoint,moves))
+    while not openList.isEmpty():
+        current,moves =  openList.pop()
+        if(problem.isGoalState(current)):
+            return moves
+        else:
+            for point,action,cost in problem.getSuccessors(current):
+                if(point not in closeList and point not in openListTrace):
+                    openList.push((point,moves+[action]))
+                    openListTrace.append(point)
+            closeList.append(current)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    openList = util.PriorityQueue()
+    closeList = []
+    openListTrace = []
+    moves = []
+    startPoint = problem.getStartState()
+    openList.push((startPoint,moves),0)
+    while not openList.isEmpty():
+        current,moves =  openList.pop()
+        if(problem.isGoalState(current)):
+            return moves
+        else:
+            for point,action,cost in problem.getSuccessors(current):
+                if(point not in closeList and point not in openListTrace):
+                    openList.push((point,moves+[action]),cost)
+                    openListTrace.append(point)
+            closeList.append(current)
 
 def nullHeuristic(state, problem=None):
     """
@@ -141,7 +159,23 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    openList = util.PriorityQueue()
+    closeList = []
+    openListTrace = []
+    moves = []
+    startPoint = problem.getStartState()
+    openList.push((startPoint,moves,0),heuristic(startPoint,problem)+0)
+    while not openList.isEmpty():
+        current,moves,totalCost =  openList.pop()
+        if(problem.isGoalState(current)):
+            return moves
+        else:
+            for point,action,cost in problem.getSuccessors(current):
+                if(point not in closeList):
+                    openList.push((point,moves+[action],totalCost+cost),(heuristic(point,problem)+totalCost+cost))
+                    tup=point,cost
+                    openListTrace.append(tup)
+            closeList.append(current)
 
 
 # Abbreviations
@@ -151,7 +185,4 @@ astar = aStarSearch
 ucs = uniformCostSearch
 
 
-class bigNode:
-    def __init__(self,prevNode,currNode):
-        self.node=currNode
-        self.prev=prevNode
+
