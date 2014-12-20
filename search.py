@@ -16,9 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
-from difflib import _format_range_context
-from macpath import curdir
-from time import clock
+
 
 import util
 
@@ -104,7 +102,7 @@ def depthFirstSearch(problem):
             return moves
         else:
             for point,action,cost in problem.getSuccessors(current):
-                if(point not in closeList and point not in openListTrace):
+                if(point not in closeList ):
                     openList.push((point,moves+[action]))
                     openListTrace.append(point)
             closeList.append(current)
@@ -131,23 +129,24 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
     openList = util.PriorityQueue()
+    openListTrace = {}
     closeList = []
-    openListTrace = []
     moves = []
     startPoint = problem.getStartState()
-    openList.push((startPoint,moves),0)
+    openList.push((startPoint,0,moves),0)
     while not openList.isEmpty():
-        current,moves =  openList.pop()
+        current,totalCost,moves =  openList.pop()
         if(problem.isGoalState(current)):
             return moves
         else:
-            for point,action,cost in problem.getSuccessors(current):
-                if(point not in closeList and point not in openListTrace):
-                    openList.push((point,moves+[action]),cost)
-                    openListTrace.append(point)
-            closeList.append(current)
+            if(current not in closeList):
+                for point,action,cost in problem.getSuccessors(current):
+                    if (point not in openListTrace or openListTrace[point] > totalCost+cost):
+                        openListTrace[point] = totalCost+cost
+                        openList.push((point,cost+totalCost,moves+[action]),cost+totalCost)
+        closeList.append(current)
+    util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
@@ -164,18 +163,22 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     moves = []
     startPoint = problem.getStartState()
     openList.push((startPoint,moves,0),heuristic(startPoint,problem)+0)
+    openListTrace.append((startPoint,heuristic(startPoint,problem)+0))
     while not openList.isEmpty():
         current,moves,totalCost =  openList.pop()
         if(problem.isGoalState(current)):
             return moves
         else:
-            for point,action,cost in problem.getSuccessors(current):
-                if(point not in closeList):
-                    openList.push((point,moves+[action],totalCost+cost),(heuristic(point,problem)+totalCost+cost))
-                    tup=point,cost
-                    openListTrace.append(tup)
-            closeList.append(current)
-
+            if(current not in closeList):
+                for point,action,cost in problem.getSuccessors(current):
+                    ok=True
+                    for tmp_point,tmp_cost in openListTrace:
+                        if tmp_point==point and tmp_cost<(heuristic(point,problem)+totalCost+cost):
+                            ok=False
+                    if (ok):
+                        openList.push((point,moves+[action],totalCost+cost),(heuristic(point,problem)+totalCost+cost))
+                        openListTrace.append((point,(heuristic(point,problem)+totalCost+cost)))
+        closeList.append(current)
 
 # Abbreviations
 bfs = breadthFirstSearch
