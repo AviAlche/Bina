@@ -498,31 +498,31 @@ def foodHeuristic(state, problem):
     """
     position,foodGrid=state
     ans=0
-    next_foodGrid,next_position=foodGrid.deepCopy(),position[:]
+    next_position,MyfoodGrid=position[:],foodGrid.deepCopy()
     for i in range(2):
-        dist_to_dots=[]
+        a_dist=[]
         for y2 in range(foodGrid.height):
           for x2 in range(foodGrid.width):
-            if (next_foodGrid[x2][y2]):
-              dist_to_dots.append((x2,y2,util.manhattanDistance(next_position,(x2,y2))))
-
-        if (len(dist_to_dots)==0):
+            if (MyfoodGrid[x2][y2]):
+              a_dist.append((x2,y2,util.manhattanDistance(next_position,(x2,y2))))
+        if (len(a_dist)==0):
             break
-
-        x_closest,y_closest,dist_closest=dist_to_dots[0]
-
-        for (x2,y2,dist) in dist_to_dots:
-            if (i==0) and (dist<dist_closest):
-                x_closest=x2
-                y_closest=y2
-                dist_closest=dist
-            if (i==1) and (dist>dist_closest):
-                x_closest=x2
-                y_closest=y2
-                dist_closest=dist
+        else:
+            x_min,y_min,dist_closest=a_dist[0]
+        for (x2,y2,dist) in a_dist:
+            if (i==0):
+                if (dist<dist_closest):
+                    y_min=y2
+                    x_min=x2
+                    dist_closest=dist
+            if (i==1):
+                if (dist>dist_closest):
+                    x_min=x2
+                    y_min=y2
+                    dist_closest=dist
         ans+=dist_closest
-        next_position=(x_closest,y_closest)
-        next_foodGrid[x_closest][y_closest]=False
+        next_position=(x_min,y_min)
+        MyfoodGrid[x_min][y_min]=False
 
     return ans
 
